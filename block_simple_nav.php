@@ -118,10 +118,15 @@ class block_simple_nav extends block_base {
 
 
 	/**
+
 	 * Looks at the navigation items and checks if
+
 	 * the actual item is active
+
 	 *
+
 	 * @return  returns string (class) active_tree_node if acitv otherwise null
+
 	 */
 	function simple_nav_get_class_if_active ($myid, $mytype) {
 		global $CFG, $PAGE;
@@ -139,9 +144,13 @@ class block_simple_nav extends block_base {
 		}
 		else {
 			if(!empty($this->page->cm->id)){
+
 				$modid = $this->page->cm->id;
+
 			} else {
+
 				$modid = false;
+
 			}
 			if ($mytype == 'module' && substr($PAGE->pagetype,0,3) == 'mod' && $myid == $modid) {
 				$myclass = ' active_tree_node';
@@ -189,6 +198,9 @@ class block_simple_nav extends block_base {
 			if (! empty($this->config->$show_mods)) {
 				$mods_value = $this->config->$show_mods;
 			}
+			elseif ($module->name == "label" || $module->name == "url") {
+				$mods_value = 0;
+			}
 			else {
 				$mods_value = 1;
 			}
@@ -202,8 +214,11 @@ class block_simple_nav extends block_base {
 			if (! empty($this->config->$show_mods_frontpage)) {
 				$mods_value_frontpage = $this->config->$show_mods_frontpage;
 			}
+			elseif ($module->name == "label" || $module->name == "url") {
+				$mods_value_frontpage = 0;
+			}
 			else {
-				$mods_value_frontpage = null;
+				$mods_value_frontpage = 1;
 			}
 
 			$module_frontpage_item = array('name'=>$module->name, 'value'=>$mods_value_frontpage);
@@ -223,13 +238,15 @@ class block_simple_nav extends block_base {
 			$show_courses = $this->config->show_courses;
 		}
 		else {
-			$show_courses = null;
+			$show_courses = 1;
+
 		}
 		if (! empty($this->config->show_modules)) {
 			$show_modules = $this->config->show_modules;
 		}
 		else {
-			$show_modules = null;
+			$show_modules = 1;
+
 		}
 
 
@@ -271,14 +288,15 @@ class block_simple_nav extends block_base {
 				$active_category_id = $category->id;
 				$is_active = true;
 			}
-				
+
 			foreach ($courses as $course) {
 
 
-
+				
+				
 				if ($category->id == $course->category && $show_courses ) {
 
-
+					
 
 					$myclass = $this->simple_nav_get_class_if_active($course->id, 'course');
 					$items[]=$this->simple_nav_collect_items ($myclass, $course->id, $course->shortname, $category->depth+2, 'course', $category->id, $icon, $course->visible);

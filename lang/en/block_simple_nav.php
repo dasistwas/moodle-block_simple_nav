@@ -23,7 +23,7 @@
     	$module_names[] = $module->name;
     }
     foreach ($module_names as $module_name) {
-    	$string['sn_show_mods_'.$module_name] = 'Show '.$module_name;
+    	$string["sn_show_mods_$module_name"] = 'Show '.$module_name;
     }
 
     $string['simple_nav:viewcourse'] = 'View courses';

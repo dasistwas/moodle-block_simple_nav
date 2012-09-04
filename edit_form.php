@@ -22,7 +22,7 @@ class block_simple_nav_edit_form extends block_edit_form {
     	}
  		
  		
- 		// to include more module types in the settings, just enlarge this array
+ 		//to include more module types in the settings, just enlarge this array
  		//$module_names = array('page','forum','choice', 'booking');
  		
         // Section header title according to language file.
@@ -32,9 +32,9 @@ class block_simple_nav_edit_form extends block_edit_form {
         $mform->setDefault('config_sn_home', '');
         $mform->setType('config_sn_home', PARAM_MULTILANG);
                 
-        $mform->addElement('advcheckbox','config_show_subcategories', get_string('sn_show_subcategories', 'block_simple_nav'),null, array('group' => 2));
-        $mform->setDefault('config_show_subcategories', 1);
-        $mform->setType('config_show_subcategories', PARAM_MULTILANG); 
+        //$mform->addElement('advcheckbox','config_show_subcategories', get_string('sn_show_subcategories', 'block_simple_nav'),null, array('group' => 2));
+        //$mform->setDefault('config_show_subcategories', 1);
+        //$mform->setType('config_show_subcategories', PARAM_MULTILANG); 
         
         $mform->addElement('advcheckbox','config_show_courses', get_string('sn_show_courses', 'block_simple_nav'),null, array('group' => 2));
         $mform->setDefault('config_show_courses', 1);
@@ -49,7 +49,14 @@ class block_simple_nav_edit_form extends block_edit_form {
         $this->add_checkbox_controller('group1');
         foreach ($module_names as $module_name) {
         	$mform->addElement('advcheckbox','config_show_mods_'.$module_name.'', get_string('sn_show_mods_'.$module_name.'', 'block_simple_nav'), null,array('group' => 'group1'));
-        	$mform->setDefault('config_show_mods_'.$module_name.'', 1);
+        	
+        	// Label and url are not real modules, so we don't want to show them by default.
+        	if ($module_name == "label" || $module_name == "url") {
+        		$mform->setDefault('config_show_mods_'.$module_name.'', 0);
+        	} else {
+        		$mform->setDefault('config_show_mods_'.$module_name.'', 1);
+        	}
+        	
         	$mform->setType('config_show_mods_'.$module_name.'', PARAM_MULTILANG);
         	$mform->disabledIf('config_show_mods_'.$module_name.'', 'config_show_modules', $condition = 'notchecked');
  		}
@@ -60,9 +67,13 @@ class block_simple_nav_edit_form extends block_edit_form {
         foreach ($module_names as $module_name) {
 
         	$mform->addElement('advcheckbox','config_show_mods_frontpage_'.$module_name.'', get_string('sn_show_mods_'.$module_name.'', 'block_simple_nav'), null,array('group' => 'group2'));
-
-        	$mform->setDefault('config_show_mods_frontpage_'.$module_name.'', 1);
-
+			
+			// Label and url are not real modules, so we don't want to show them by default.
+			if ($module_name == "label" || $module_name == "url") {
+        		$mform->setDefault('config_show_mods_frontpage_'.$module_name.'', 0);
+			} else {
+				$mform->setDefault('config_show_mods_frontpage_'.$module_name.'', 1);
+			}
         	$mform->setType('config_show_mods_frontpage_'.$module_name.'', PARAM_MULTILANG);
 
         	$mform->disabledIf('config_show_mods_frontpage_'.$module_name.'', 'config_show_modules', $condition = 'notchecked');
