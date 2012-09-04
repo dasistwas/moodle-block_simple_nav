@@ -30,8 +30,8 @@
  *
  * @package blocks
  * @copyright 2012 Geord Maißer und David Bogner http://www.edulabs.org
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+*/
 class block_simple_nav extends block_base {
 
 	/** @var int */
@@ -120,14 +120,13 @@ class block_simple_nav extends block_base {
 	/**
 	 * Looks at the navigation items and checks if
 	 * the actual item is active
-	 * 
+	 *
 	 * @return  returns string (class) active_tree_node if acitv otherwise null
 	 */
 	function simple_nav_get_class_if_active ($myid, $mytype) {
 		global $CFG, $PAGE;
-		
 		$myclass = null;
-		
+
 		if ($mytype == null && ($PAGE->pagetype <> 'site-index' && $PAGE->pagetype <>'admin-index')) {
 			return $myclass;
 		}
@@ -139,13 +138,18 @@ class block_simple_nav extends block_base {
 			return $myclass;
 		}
 		else {
-			if ($mytype == 'module' && substr($PAGE->pagetype,0,3)== 'mod' && $myid== $this->page->cm->id) {
+			if(!empty($this->page->cm->id)){
+				$modid = $this->page->cm->id;
+			} else {
+				$modid = false;
+			}
+			if ($mytype == 'module' && substr($PAGE->pagetype,0,3) == 'mod' && $myid == $modid) {
 				$myclass = ' active_tree_node';
 				return $myclass;
 			}
 			elseif ($mytype == 'course' && $myid== $this->page->course->id) {
 				$myclass = ' active_tree_node';
-				
+
 				return $myclass;
 			}
 			elseif (isset($this->page->category->path)) {
@@ -186,13 +190,13 @@ class block_simple_nav extends block_base {
 				$mods_value = $this->config->$show_mods;
 			}
 			else {
-				$mods_value = null;
+				$mods_value = 1;
 			}
 
 			$module_item = array('name'=>$module->name, 'value'=>$mods_value);
 			$module_items[] = $module_item;
 		}
-		
+
 		foreach ($modules as $module) {
 			$show_mods_frontpage = 'show_mods_frontpage_'.$module->name;
 			if (! empty($this->config->$show_mods_frontpage)) {
@@ -251,31 +255,31 @@ class block_simple_nav extends block_base {
 		//$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.modinfo, c.visible');
 
 		//print_object($courses);
-		//get the Home-Node 
+		//get the Home-Node
 		$myclass = $this->simple_nav_get_class_if_active(null, null);
 		$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'home', 0, null, null);
-		
+
 		// Now we run through all the categories
 		foreach ($categories as $category) {
-			
-				//the myclass variable holds relevant CSS code for active nodes
-				$myclass = $this->simple_nav_get_class_if_active($category->id, 'category');
-				// we don't write directly to $content[], because we have to change CSS-Code for active branches. So here we only build the navigation
-				$items[]=$this->simple_nav_collect_items($myclass, $category->id, $category->name, $category->depth+1, 'category', $category->id, $icon, 1);
-				 
-				if ($myclass) {
-					$active_category_id = $category->id;
-					$is_active = true;
-				}
-			
+				
+			//the myclass variable holds relevant CSS code for active nodes
+			$myclass = $this->simple_nav_get_class_if_active($category->id, 'category');
+			// we don't write directly to $content[], because we have to change CSS-Code for active branches. So here we only build the navigation
+			$items[]=$this->simple_nav_collect_items($myclass, $category->id, $category->name, $category->depth+1, 'category', $category->id, $icon, 1);
+				
+			if ($myclass) {
+				$active_category_id = $category->id;
+				$is_active = true;
+			}
+				
 			foreach ($courses as $course) {
 
 
 
 				if ($category->id == $course->category && $show_courses ) {
-					 
 
-						
+
+
 					$myclass = $this->simple_nav_get_class_if_active($course->id, 'course');
 					$items[]=$this->simple_nav_collect_items ($myclass, $course->id, $course->shortname, $category->depth+2, 'course', $category->id, $icon, $course->visible);
 
@@ -290,16 +294,16 @@ class block_simple_nav extends block_base {
 					if ($myclass) {
 						$is_active = true;
 					}
-						
-						
+
+
 					//Here we check the modules for each course
 					$modules = get_course_mods($course->id);
-						
+
 					if ($modules && !$show_modules) {
 						continue;
 					}
-						
-						
+
+
 					//we run through them and add them to the $items
 					foreach ($modules as $module) {
 
@@ -320,41 +324,41 @@ class block_simple_nav extends block_base {
 								break;
 							}
 						}
-						
+
 					}
-						
+
 
 
 				}
 			}
 		}
-		
-		
-		
+
+
+
 		// the following lines are to get all the mods which are directly beneath the startpage. This is a special case, so we have to treat it differently.
 		$modules = get_course_mods(1);
-		if ($modules && $show_modules) {			
+		if ($modules && $show_modules) {
 			//we run through them and add them to the $items
 
 			foreach ($modules as $module) {
 
 				//this is necessary to be able to get the module name, we hereby fetch the module object
 				$module_object = get_coursemodule_from_id($module->modname, $module->id);
-				
-					if (!$module_object->visible) {
-						continue;
+
+				if (!$module_object->visible) {
+					continue;
+				}
+				foreach ($module_frontpage_items as $module_item) {
+					if ($module_item['name'] == $module_object->modname && $module_item['value']) {
+						$myclass = $this->simple_nav_get_class_if_active($module_object->id, 'module');
+						$items[]=$this->simple_nav_collect_items ($myclass, $module_object->id, $module_object->name, $category->depth, 'module', $module_object->course, $module_object->modname, 1);
+						break;
 					}
-					foreach ($module_frontpage_items as $module_item) {
-						if ($module_item['name'] == $module_object->modname && $module_item['value']) {
-							$myclass = $this->simple_nav_get_class_if_active($module_object->id, 'module');
-							$items[]=$this->simple_nav_collect_items ($myclass, $module_object->id, $module_object->name, $category->depth, 'module', $module_object->course, $module_object->modname, 1);
-							break;
-						}
-					}
+				}
 			}
 		}
-		
-		
+
+
 		$this->page->navigation->initialise();
 		$navigation = clone($this->page->navigation);
 
@@ -362,7 +366,7 @@ class block_simple_nav extends block_base {
 
 		$this->content         =  new stdClass;
 		$this->content->text   = $renderer->simple_nav_tree($items);
-		 
+			
 
 
 		// Set content generated to true so that we know it has been done
