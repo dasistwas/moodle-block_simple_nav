@@ -188,14 +188,16 @@ class block_simple_nav extends block_base {
 		// We fetch a list of all the module names
 		$module_names = array();
 			
-		// get a list of all the modules names to print the necessary checkboxes
+		// get a list of all the modules names
 		if (!$modules = $DB->get_records('modules', array(), 'name ASC')) {
 			print_error('moduledoesnotexist', 'error');
 		}
 		// and make an array with all the names
 		foreach ($modules as $module) {
 			$show_mods = 'show_mods_'.$module->name;
-			if (! empty($this->config->$show_mods)) {
+			
+			if (! empty($this->config)) {
+
 				$mods_value = $this->config->$show_mods;
 			}
 			elseif ($module->name == "label" || $module->name == "url") {
@@ -203,6 +205,7 @@ class block_simple_nav extends block_base {
 			}
 			else {
 				$mods_value = 1;
+				
 			}
 
 			$module_item = array('name'=>$module->name, 'value'=>$mods_value);
@@ -211,7 +214,7 @@ class block_simple_nav extends block_base {
 
 		foreach ($modules as $module) {
 			$show_mods_frontpage = 'show_mods_frontpage_'.$module->name;
-			if (! empty($this->config->$show_mods_frontpage)) {
+			if (! empty($this->config)) {
 				$mods_value_frontpage = $this->config->$show_mods_frontpage;
 			}
 			elseif ($module->name == "label" || $module->name == "url") {
@@ -266,7 +269,7 @@ class block_simple_nav extends block_base {
 
 		//get all the Categories
 		$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
-		//print_object($categories);
+		
 		//get all the Courses
 		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.*');
 		//$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.modinfo, c.visible');
