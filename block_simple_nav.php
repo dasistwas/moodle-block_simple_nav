@@ -154,6 +154,7 @@ class block_simple_nav extends block_base {
 			}
 			if ($mytype == 'module' && substr($PAGE->pagetype,0,3) == 'mod' && $myid == $modid) {
 				$myclass = ' active_tree_node';
+				
 				return $myclass;
 			}
 			elseif ($mytype == 'course' && $myid== $this->page->course->id) {
@@ -274,7 +275,6 @@ class block_simple_nav extends block_base {
 		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.*');
 		//$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.modinfo, c.visible');
 
-		//print_object($courses);
 		//get the Home-Node
 		$myclass = $this->simple_nav_get_class_if_active(null, null);
 		$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'home', 0, null, null);
@@ -294,12 +294,7 @@ class block_simple_nav extends block_base {
 
 			foreach ($courses as $course) {
 
-
-				
-				
 				if ($category->id == $course->category && $show_courses ) {
-
-					
 
 					$myclass = $this->simple_nav_get_class_if_active($course->id, 'course');
 					$items[]=$this->simple_nav_collect_items ($myclass, $course->id, $course->shortname, $category->depth+2, 'course', $category->id, $icon, $course->visible);
@@ -318,22 +313,21 @@ class block_simple_nav extends block_base {
 
 
 					//Here we check the modules for each course
-					$modules = get_course_mods($course->id);
-
+					//$modules = get_course_mods($course->id);
+					$modules = get_fast_modinfo($course)->get_cms();
+					
 					if ($modules && !$show_modules) {
 						continue;
 					}
 
 
 					//we run through them and add them to the $items
-					foreach ($modules as $module) {
-
+					foreach ($modules as $module) {						
 
 						//this is necessary to be able to get the module name, we hereby fetch the module object
 						$module_object = get_coursemodule_from_id($module->modname, $module->id);
 						// here we exclude some mod-types we don't need in the navigation and then collect the information
-
-						if (!$module_object->visible) {
+						if (!$module->uservisible) {
 							continue;
 						}
 

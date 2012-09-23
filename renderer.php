@@ -1,7 +1,10 @@
 <?php
 /**
+
  * Used to render the navigation items in the simple_nav block
+
  *
+
  */
 class block_simple_nav_renderer extends plugin_renderer_base {
 
@@ -84,7 +87,10 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 		}
 		// is it a course
 		elseif ($mytype == 'course') {
-
+			// We don't want course-nodes to be open, even when they are active so:
+			// $mycollapsed =' collapsed';
+			
+			
 			$myurl =$CFG->wwwroot.'/course/view.php?id='.$myid;
 
 			$myclass_ul_open = '';
