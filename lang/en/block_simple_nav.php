@@ -1,7 +1,7 @@
 <?php
 
 	
-    $string['pluginname'] = 'Simple navigation block';
+    $string['pluginname'] = 'Simple navigation';
     $string['simple_nav'] = 'Simple navigation';
     $string['blockstring'] = 'Feld Titel';
     $string['sn_home'] = 'Home: Leave empty for using Moodle default';
