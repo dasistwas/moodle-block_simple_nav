@@ -46,7 +46,14 @@ class block_simple_nav extends block_base {
 	function init() {
 		global $CFG;
 		$this->blockname = get_class($this);
-		$this->title = get_string('pluginname', $this->blockname);
+		// we moved this here from "init" in order to have acces to $this->config
+		if (! empty($this->config->sn_blocktitle)) {
+			$sn_blocktitle = $this->config->sn_blocktitle;
+		} else {
+			$sn_blocktitle = get_string('pluginname', $this->blockname);
+		}
+		$this->title = $sn_blocktitle;
+		
 	}
 
 	/**
@@ -54,7 +61,7 @@ class block_simple_nav extends block_base {
 	 * @return bool Returns true
 	 */
 	function instance_allow_multiple() {
-		return false;
+		return true;
 	}
 
 	/**
@@ -64,7 +71,10 @@ class block_simple_nav extends block_base {
 	function applicable_formats() {
 		return array('all' => true);
 	}
-
+	
+	function specialization() {
+		$this->title = isset($this->config->sn_blocktitle) ? format_string($this->config->sn_blocktitle) : format_string(get_string('pluginname', 'block_simple_nav'));
+	}
 	/**
 	 * Allow the user to configure a block instance
 	 * @return bool Returns true
@@ -84,6 +94,7 @@ class block_simple_nav extends block_base {
 	}
 
 	function instance_can_be_docked() {
+		
 		return (parent::instance_can_be_docked() && (empty($this->config->enabledock) || $this->config->enabledock=='yes'));
 	}
 
@@ -180,28 +191,45 @@ class block_simple_nav extends block_base {
 
 		global $CFG, $USER, $DB, $OUTPUT, $PAGE;
 		$myopentag = '';
+		$startcategories = array();
+		$categories = array();
 
 		if($this->content !== NULL) {
 			return $this->content;
 		}
-
+		
 
 		// We fetch a list of all the module names
 		$module_names = array();
 			
-		// get a list of all the modules names
+		// getting a list of all the modules names is inactive, as it leads to some problems with non standard modules. We do this manually beneath
 		if (!$modules = $DB->get_records('modules', array(), 'name ASC')) {
 			print_error('moduledoesnotexist', 'error');
 		}
+
+		//get all the Categories
+		$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
+		
+		
+		
 		// and make an array with all the names
 		foreach ($modules as $module) {
+		
+			// we use from hereon "$module['name']. If we automatically fetch the list of modules (see above), this has to be changed to §module->name
 			$show_mods = 'show_mods_'.$module->name;
 			
 			if (! empty($this->config)) {
-
-				$mods_value = $this->config->$show_mods;
+				// we check here if there is a valid property available in the config-file for a specific module
+				if (isset($this->config->$show_mods)) {
+					$mods_value = $this->config->$show_mods;
+				}
+				// if this is not the case, we just turn it off
+				else {
+					$mods_value = 0;
+				}
 			}
-			elseif ($module->name == "label" || $module->name == "url") {
+			// this code is only needed when we want to exclude some of the modules
+			 elseif ($module->name == "label" || $module->name == "url") {
 				$mods_value = 0;
 			}
 			else {
@@ -215,8 +243,18 @@ class block_simple_nav extends block_base {
 
 		foreach ($modules as $module) {
 			$show_mods_frontpage = 'show_mods_frontpage_'.$module->name;
+			
 			if (! empty($this->config)) {
-				$mods_value_frontpage = $this->config->$show_mods_frontpage;
+				// we check here if there is a valid property available in the config-file for a specific module
+				if (isset($this->config->$show_mods_frontpage)) {
+					$mods_value_frontpage = $this->config->$show_mods_frontpage;
+				}
+				// if this is not the case, we just turn it off
+				else {
+					//print_object($module);
+					$mods_value_frontapge = 0;
+					// echo "Please click on safe in the config section of this block, there is a module for which there is no config property defined";
+				}
 			}
 			elseif ($module->name == "label" || $module->name == "url") {
 				$mods_value_frontpage = 0;
@@ -252,41 +290,71 @@ class block_simple_nav extends block_base {
 			$show_modules = 1;
 
 		}
-
+		
 
 		$this->content = new stdClass;
 		$this->content->items = array();
 		$this->content->icons = array();
 		$this->content->footer = '';
-
+		
 		//some variables
 		$content = array();
-		$categories = array();
 		$items = array();
 		$active_module_course = null;
 		$is_active = false;
 		$mybranch = array();
 		$icon ='';
-
-		//get all the Categories
-		$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
 		
 		//get all the Courses
 		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.*');
 		//$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.modinfo, c.visible');
 
 		//get the Home-Node
-		$myclass = $this->simple_nav_get_class_if_active(null, null);
-		$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'home', 0, null, null);
+		// first check if the Home Node is activated in the admin section
+		$check_startcategory ="startcategory_home";
+		if (isset($this->config->$check_startcategory)) {
+			$startcategory_value = $this->config->$check_startcategory;
+		}
+		// if this is not set, we assume that we want to display everything
+		else {
+			$startcategory_value = 1;
+		}
+		if ($startcategory_value == 1) {
+			$myclass = $this->simple_nav_get_class_if_active(null, null);
+			$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'home', 0, null, null);
+		}
+		else {
+			// if we don't use "home" we still print it, but don't use text. This is important to not destroy the html and javaScript
+			$myclass = $this->simple_nav_get_class_if_active(null, null);
+			$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'nohome', 0, null, null);
+		}
 
+		
 		// Now we run through all the categories
 		foreach ($categories as $category) {
-				
-			//the myclass variable holds relevant CSS code for active nodes
-			$myclass = $this->simple_nav_get_class_if_active($category->id, 'category');
-			// we don't write directly to $content[], because we have to change CSS-Code for active branches. So here we only build the navigation
-			$items[]=$this->simple_nav_collect_items($myclass, $category->id, $category->name, $category->depth+1, 'category', $category->id, $icon, 1);
-				
+			// we just want to show the category if it is selected in the admin-section
+			
+			$check_startcategory = "startcategory_".$category->id;
+			if (isset($this->config->$check_startcategory)) {
+					$startcategory_value = $this->config->$check_startcategory;
+			}
+			// We look if there is no config object at all. If there is a config object, we put the value on 0
+			elseif(!empty($this->config)) {
+				$startcategory_value = 0;
+			}
+			// if there is no config object at all, we just show everything.
+			else {
+				$startcategory_value = 1;
+			}
+			if ($startcategory_value == 1) {	
+				//the myclass variable holds relevant CSS code for active nodes
+				$myclass = $this->simple_nav_get_class_if_active($category->id, 'category');
+				// we don't write directly to $content[], because we have to change CSS-Code for active branches. So here we only build the navigation
+				$items[]=$this->simple_nav_collect_items($myclass, $category->id, $category->name, $category->depth+1, 'category', $category->id, $icon, 1);
+			}
+			else {
+				continue;
+			}	
 			if ($myclass) {
 				$active_category_id = $category->id;
 				$is_active = true;
@@ -326,7 +394,7 @@ class block_simple_nav extends block_base {
 
 						//this is necessary to be able to get the module name, we hereby fetch the module object
 						$module_object = get_coursemodule_from_id($module->modname, $module->id);
-						// here we exclude some mod-types we don't need in the navigation and then collect the information
+						// show only modules that are visible to the user
 						if (!$module->uservisible) {
 							continue;
 						}
@@ -366,7 +434,7 @@ class block_simple_nav extends block_base {
 				foreach ($module_frontpage_items as $module_item) {
 					if ($module_item['name'] == $module_object->modname && $module_item['value']) {
 						$myclass = $this->simple_nav_get_class_if_active($module_object->id, 'module');
-						$items[]=$this->simple_nav_collect_items ($myclass, $module_object->id, $module_object->name, $category->depth, 'module', $module_object->course, $module_object->modname, 1);
+						$items[]=$this->simple_nav_collect_items ($myclass, $module_object->id, $module_object->name, 1, 'module', $module_object->course, $module_object->modname, 1);
 						break;
 					}
 				}

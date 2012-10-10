@@ -52,6 +52,7 @@ class block_simple_nav_renderer extends plugin_renderer_base {
     
     protected function sn_print_item($myclass, $myid, $myname, $mydepth, $mytype, $mypath, $myicon, $myvisibility) {
 		global $CFG, $OUTPUT;
+		//print_object($CFG);
 
 		$icon = '';
 		$baseurl =$CFG->wwwroot;
@@ -88,7 +89,7 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 		// is it a course
 		elseif ($mytype == 'course') {
 			// We don't want course-nodes to be open, even when they are active so:
-			// $mycollapsed =' collapsed';
+			$mycollapsed =' collapsed';
 			
 			
 			$myurl =$CFG->wwwroot.'/course/view.php?id='.$myid;
@@ -118,6 +119,17 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 			$myclass_a = '';
 
 		}
+		// or invisible home node
+		elseif ($mytype == 'nohome') {
+			$myurl =$CFG->wwwroot;
+			$myname = "";
+			$myclass_ul_open = '<ul class="block_tree list">';
+			$myclass_li = 'type_unknown depth_1 contains_branch';
+			$myclass_p = 'tree_item branch '.$myclass.' navigation_node';
+			$myopentag = '<ul>';
+			$myclass_a = '';
+
+		}
 		// or a module
 		elseif ($mytype == 'module') {
 			$myurl =$CFG->wwwroot.'/mod/'.$myicon.'/view.php?id='.$myid;
@@ -133,7 +145,10 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 			else {
 				$myclass_a = '';
 			}
-
+			// fork for Angela Kohl
+			
+			//$icon = '<img alt="'.$myicon.'" class="smallicon navicon" title="'.$myicon.'" src="'.$baseurl.'/theme/image.php?theme='.$CFG->theme.'&amp;image=t/collapsed&amp;rev=295&amp;component=core">';
+			
 			$icon = '<img alt="'.$myicon.'" class="smallicon navicon" title="'.$myicon.'" src="'.$baseurl.'/theme/image.php?theme=standard&amp;image=icon&amp;rev=295&amp;component='.$myicon.'">';
 		}
 		
