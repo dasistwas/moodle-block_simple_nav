@@ -1,6 +1,6 @@
 <?php
 
-$plugin->version = 2012062800;
+$plugin->version = 2012101000;
 $plugin->requires = 2010112400;
 $plugin->cron = 0;
 $plugin->component = 'block_simple_nav';
