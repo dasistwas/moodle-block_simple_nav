@@ -3,11 +3,13 @@
 .block_simple_nav .block_tree li {margin:3px;list-style: none;padding:0;}
 .block_simple_nav .block_tree li.item_with_icon > p {position:relative;}
 .block_simple_nav .block_tree li.item_with_icon > p img {vertical-align:middle;position:absolute;left:0;top:3px}
-.block_simple_nav .block_tree li.item_with_icon.contains_branch > p img {left:16px;}
-.block_simple_nav .block_tree li.item_with_icon.contains_branch .tree_item {padding-left:34px;}
+.block_simple_nav .block_tree li.item_with_icon.contains_branch > p img {left:0;}
+.block_simple_nav .block_tree li.item_with_icon.contains_branch .tree_item {padding-left:18px;}
 
-.block_simple_nav .block_tree li ul {padding-left:0;margin:0;}
-.block_simple_nav .block_tree li.depth_2 ul {padding-left:16px;margin:0;}
+.block_simple_nav .block_tree li.simple_invisible { margin-left: -12px;}
+.block_simple_nav .block_tree li.simple_invisible:first-child > p a { display:none;}
+
+.block_simple_nav .block_tree li ul {padding-left:12px;margin:0;}
 .block_simple_nav .block_tree .tree_item {padding-left: 18px;margin:3px 0px;text-align:left;}
 
 .block_simple_nav .block_tree .tree_item.branch {background-image: url([[pix:t/expanded]]);background-position: 0 10%;background-repeat: no-repeat;}
@@ -54,3 +56,4 @@
 div#fitem_id_nosubmit_checkbox_controllergroup1 .fsubmit, div#fitem_id_nosubmit_checkbox_controllergroup2 .fsubmit{
 	text-align: left;
 }
+

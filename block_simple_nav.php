@@ -46,13 +46,7 @@ class block_simple_nav extends block_base {
 	function init() {
 		global $CFG;
 		$this->blockname = get_class($this);
-		// we moved this here from "init" in order to have acces to $this->config
-		if (! empty($this->config->sn_blocktitle)) {
-			$sn_blocktitle = $this->config->sn_blocktitle;
-		} else {
-			$sn_blocktitle = get_string('pluginname', $this->blockname);
-		}
-		$this->title = $sn_blocktitle;
+		$this->title = get_string('pluginname', 'block_simple_nav');
 		
 	}
 
@@ -74,6 +68,9 @@ class block_simple_nav extends block_base {
 	
 	function specialization() {
 		$this->title = isset($this->config->sn_blocktitle) ? format_string($this->config->sn_blocktitle) : format_string(get_string('pluginname', 'block_simple_nav'));
+		if($this->title == ''){
+			$this->title = format_string(get_string('pluginname', 'block_simple_nav'));
+		}
 	}
 	/**
 	 * Allow the user to configure a block instance
@@ -276,18 +273,25 @@ class block_simple_nav extends block_base {
 			$sn_home = get_string('home');
 		}
 
-		if (! empty($this->config->show_courses)) {
+		if (! empty($this->config)) {
 			$show_courses = $this->config->show_courses;
 		}
 		else {
 			$show_courses = 1;
 
 		}
-		if (! empty($this->config->show_modules)) {
+		if (! empty($this->config)) {
 			$show_modules = $this->config->show_modules;
 		}
 		else {
 			$show_modules = 1;
+
+		}
+		if (! empty($this->config) && isset($this->config->show_toplevelnode)) {
+			$show_toplevelnode = $this->config->show_toplevelnode;
+		}
+		else {
+			$show_toplevelnode = 1;
 
 		}
 		
@@ -304,6 +308,9 @@ class block_simple_nav extends block_base {
 		$is_active = false;
 		$mybranch = array();
 		$icon ='';
+		$topnodelevel = 0;
+		
+		
 		
 		//get all the Courses
 		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.*');
@@ -329,9 +336,12 @@ class block_simple_nav extends block_base {
 			$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'nohome', 0, null, null);
 		}
 
+		// here we set a value to determine, wether this is the topnode category
 		
 		// Now we run through all the categories
 		foreach ($categories as $category) {
+			
+			
 			// we just want to show the category if it is selected in the admin-section
 			
 			$check_startcategory = "startcategory_".$category->id;
@@ -341,25 +351,43 @@ class block_simple_nav extends block_base {
 			// We look if there is no config object at all. If there is a config object, we put the value on 0
 			elseif(!empty($this->config)) {
 				$startcategory_value = 0;
+				
 			}
 			// if there is no config object at all, we just show everything.
 			else {
 				$startcategory_value = 1;
 			}
-			if ($startcategory_value == 1) {	
+			
+			//)
+			//
+			
+			if ($startcategory_value >= 1) {
+			
 				//the myclass variable holds relevant CSS code for active nodes
 				$myclass = $this->simple_nav_get_class_if_active($category->id, 'category');
+				
+				// look if we want to show the topnode. Else we set the name of the topnode category to ""
+				if ($show_toplevelnode <> 1 && (empty($topnodelevel) || $topnodelevel == $category->depth)) {
+					$category_name = "";
+					$myclass.=" startingpoint";
+					$topnodelevel = $category->depth;
+				}
+				else {
+					$category_name = $category->name;
+				}	
+				
 				// we don't write directly to $content[], because we have to change CSS-Code for active branches. So here we only build the navigation
-				$items[]=$this->simple_nav_collect_items($myclass, $category->id, $category->name, $category->depth+1, 'category', $category->id, $icon, 1);
+				$items[]=$this->simple_nav_collect_items($myclass, $category->id, $category_name, $category->depth+1, 'category', $category->id, $icon, 1);
 			}
 			else {
 				continue;
 			}	
-			if ($myclass) {
+			if (substr($myclass, 0, 17) == ' active_tree_node') {
 				$active_category_id = $category->id;
 				$is_active = true;
 			}
-
+			
+			
 			foreach ($courses as $course) {
 
 				if ($category->id == $course->category && $show_courses ) {

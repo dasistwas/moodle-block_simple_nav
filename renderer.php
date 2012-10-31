@@ -12,23 +12,35 @@ class block_simple_nav_renderer extends plugin_renderer_base {
         $depth = 0;
         $type = 0;
         foreach ($items as $item) {
-        	
+        	//print_object($item);
         	//category and courses open <ul> tags. if they are empty, we have to make sure they're closed again.
 
+			
 			// We have to check if the category before was empty
         	if ($depth>=$item['mydepth'] && $type == 'category' && $item['mytype'] == 'category') {
         		$content[] = '</li></ul>';
         	}
 			
+			
         	//this is to know if we have to close the tags for the branch. We calculate the difference between the old and new branch and add the close tags accordingly
         	if ($depth>$item['mydepth']) {
-        		$mydifference = $depth-$item['mydepth'];
+        		// this is necessary to take care of the "startingpoint"-case, which suppresses the output of a category sometimes
+        		if (substr($item['myclass'], -14, 14) == ' startingpoint') {
+					$mydifference = $depth-$item['mydepth']-1;
+				}
+				else {
+        			$mydifference = $depth-$item['mydepth'];
+        		}
         		$content[] = str_repeat('</li></ul>',$mydifference);
         	}
+        	
+        	
         	// Every time we the last item was a module and the new isn't, we can close <ul> as well as <li>
         	elseif ($item['mytype'] <> 'module' && $type == 'module') {
         		$content[] = '</li></ul>';
         	}
+        	
+        	
         	// if depth stays the same, we can just close the <li> tag
         	elseif ($depth==$item['mydepth']) {
         		$content[] = '</li>';
@@ -38,6 +50,7 @@ class block_simple_nav_renderer extends plugin_renderer_base {
         	if ($item['mytype'] == 'module' && ($type == 'course' || $type == 'invisiblecourse')) {
         		$content[] = '<ul>';
         	}
+        	
         	//print out html code for the item
         	$content[] = $this->sn_print_item($item['myclass'], $item['myid'], $item['myname'], $item['mydepth'], $item['mytype'], $item['mypath'], $item['myicon'], $item['myvisibility']);
         	// keep the information for the next loop
@@ -52,14 +65,20 @@ class block_simple_nav_renderer extends plugin_renderer_base {
     
     protected function sn_print_item($myclass, $myid, $myname, $mydepth, $mytype, $mypath, $myicon, $myvisibility) {
 		global $CFG, $OUTPUT;
-		//print_object($CFG);
 
 		$icon = '';
 		$baseurl =$CFG->wwwroot;
+		$mystartclass = "";
 
 		if (! empty($this->config->space)) {
     		$space_symbol = $this->config->space;
 		}
+		
+		//if we don't want to show the first node, we use the class "startingpoint" as an indicator to totally skip it
+		if (substr($myclass, -14, 14) == ' startingpoint') {
+				return null;	
+		}
+		
 		// we only want the active branch to be open, all the other ones whould be collapsed
 		$mycollapsed ='';
 		// myclass only has a value when it's active
@@ -69,12 +88,22 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 		else {
 			$mycollapsed ='';
 		}
+		
+		 //sometimes, we don't show categories by simple setting their name to "". If this is the case, we want them not to be collapsed.
+        //Here is a simple way to do so:
+        //If the Name is empty, we also set the class, which controls the collapsed/uncollapsed status, to "".
+        if (empty($myname)) {
+        	$mycollapsed = "";
+        }
+		
+		
+		
 		// is it a category
 		if ($mytype == 'category') {
 			$myurl =$CFG->wwwroot.'/course/category.php?id='.$myid;
-
+			//$myname = "";
 			$myclass_ul_open = '';
-			$myclass_li = 'type_category depth_'.$mydepth.''.$mycollapsed.' contains_branch';
+			$myclass_li = 'type_category depth_'.$mydepth.''.$mycollapsed.' contains_branch'.$mystartclass;
 			$myclass_p = 'tree_item branch'.$myclass;
 			$myopentag = '<ul>';
 			$myclass_a = '';
@@ -89,7 +118,7 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 		// is it a course
 		elseif ($mytype == 'course') {
 			// We don't want course-nodes to be open, even when they are active so:
-			$mycollapsed =' collapsed';
+			//$mycollapsed =' collapsed';
 			
 			
 			$myurl =$CFG->wwwroot.'/course/view.php?id='.$myid;
@@ -122,9 +151,8 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 		// or invisible home node
 		elseif ($mytype == 'nohome') {
 			$myurl =$CFG->wwwroot;
-			$myname = "";
 			$myclass_ul_open = '<ul class="block_tree list">';
-			$myclass_li = 'type_unknown depth_1 contains_branch';
+			$myclass_li = 'type_unknown depth_1 contains_branch simple_invisible';
 			$myclass_p = 'tree_item branch '.$myclass.' navigation_node';
 			$myopentag = '<ul>';
 			$myclass_a = '';

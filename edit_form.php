@@ -36,6 +36,11 @@ class block_simple_nav_edit_form extends block_edit_form {
         $mform->setDefault('config_show_modules', 1);
         $mform->setType('config_show_modules', PARAM_MULTILANG);
         
+        // show link toplevelnode
+        $mform->addElement('advcheckbox','config_show_toplevelnode', get_string('sn_show_toplevelnode', 'block_simple_nav'),null, array('group' => 2));
+        $mform->setDefault('config_show_toplevelnode', 1);
+        $mform->setType('config_show_toplevelnode', PARAM_MULTILANG);
+        
         
         //we want to be able to select the categories we want to include here
         
@@ -50,9 +55,10 @@ class block_simple_nav_edit_form extends block_edit_form {
  			// change the value here if you want to control more of the subcategories etc. After changing the value, you have to check if everything is displayed as you want. It might be necessary to reinstall the whole block (especially when you decrease the value)
  			if ($category->depth<=2) {
  				// if you enter a value for str_repeat (like "--" i.e., the categories and subcategories will be easier to distinguish
- 				$mform->addElement('advcheckbox','config_startcategory_'.$category->id.'', $category->name.''.str_repeat("*",$category->depth), null,array('group' => 'group3'));
+ 				$mform->addElement('advcheckbox','config_startcategory_'.$category->id.'', str_repeat("*",$category->depth).$category->name.'', null,array('group' => 'group3'));
  				$mform->setDefault('config_startcategory_'.$category->id.'', 0);
         		$mform->setType('config_startcategory_'.$category->id.'', PARAM_MULTILANG);
+        		//$mform->setValue($category->depth);
         		$mform->disabledIf('config_startcategory_'.$category->id.'', $category->name, $condition = 'notchecked');
         	}
  		}

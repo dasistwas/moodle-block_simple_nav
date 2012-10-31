@@ -13,7 +13,8 @@
     $string['sn_modules_in_courses'] = 'Show modules in courses';
     $string['sn_modules_on_frontpage'] = 'Show modules on frontpage';
     $string['sn_startcategory'] = 'Which categories should be displayed in the simple nav block';
-    
+    $string['sn_show_toplevelnode'] = 'Show Toplevelnode (changing this might cause inactive nodes to be invisible)';
+	    
 
     // if new modules are added, the language files have to be included
     $string['sn_show_mods'] = 'Show ';
