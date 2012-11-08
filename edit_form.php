@@ -53,7 +53,7 @@ class block_simple_nav_edit_form extends block_edit_form {
         $mform->disabledIf('config_startcategory_home', "home", $condition = 'checked');
  		foreach ($categories as $category) {
  			// change the value here if you want to control more of the subcategories etc. After changing the value, you have to check if everything is displayed as you want. It might be necessary to reinstall the whole block (especially when you decrease the value)
- 			if ($category->depth<=2) {
+ 			if ($category->depth<=6) {
  				// if you enter a value for str_repeat (like "--" i.e., the categories and subcategories will be easier to distinguish
  				$mform->addElement('advcheckbox','config_startcategory_'.$category->id.'', str_repeat("*",$category->depth).$category->name.'', null,array('group' => 'group3'));
  				$mform->setDefault('config_startcategory_'.$category->id.'', 0);

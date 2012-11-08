@@ -3,9 +3,9 @@
 	
     $string['pluginname'] = 'Simple navigation block';
     $string['simple_nav'] = 'Simple navigation';
-    $string['blockstring'] = 'Feld Titel';
+    $string['blockstring'] = 'Field title';
     $string['sn_home'] = 'Home: Leave empty for using Moodle default';
-    $string['sn_blocktitle'] = 'Block Title: Leave empty for using "Simple Nav"';
+    $string['sn_blocktitle'] = 'Block title: Leave empty for using default';
     $string['sn_space'] = 'Intent Symbol';
     $string['sn_show_subcategories'] = 'Show Subcategories';
     $string['sn_show_courses'] = 'Show courses';
