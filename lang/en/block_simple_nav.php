@@ -3,6 +3,7 @@
 	
     $string['pluginname'] = 'Simple navigation block';
     $string['simple_nav'] = 'Simple navigation';
+    $string['simple_nav:addinstance'] = 'Add a new Simple Navigation block';
     $string['blockstring'] = 'Field title';
     $string['sn_home'] = 'Home: Leave empty for using Moodle default';
     $string['sn_blocktitle'] = 'Block title: Leave empty for using default';
