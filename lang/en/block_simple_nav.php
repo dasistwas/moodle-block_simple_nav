@@ -15,12 +15,14 @@
     $string['sn_modules_on_frontpage'] = 'Show modules on frontpage';
     $string['sn_startcategory'] = 'Which categories should be displayed in the simple nav block';
     $string['sn_show_toplevelnode'] = 'Show Toplevelnode (changing this might cause inactive nodes to be invisible)';
-	    
-
+    $string['displaywithicons'] = 'Display bullet point with standard Moodle-Theme icons';
+    $string['displaysingleicon'] = 'Display ► as the only icon for all bullet points';
+    $string['displaytwoicons'] = 'Display ► for courses and course categories and ▪ modules';
+    $string['displayoptions'] = 'Bullet point display options';
+    $string['displayoptionsdesc'] = 'You can choose how the bullet points in the navigation tree look like: standard with icons, only ►, ► and ▪';
+    
+    
     // if new modules are added, the language files have to be included
     $string['sn_show_mods'] = 'Show ';
-    
-    
-
     $string['simple_nav:viewcourse'] = 'View courses';
     

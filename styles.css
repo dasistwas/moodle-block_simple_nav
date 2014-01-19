@@ -2,8 +2,9 @@
 .block_simple_nav .block_tree {margin:5px;padding-left:0px;overflow:visible;}
 .block_simple_nav .block_tree li {margin:3px;list-style: none;padding:0;}
 .block_simple_nav .block_tree li.item_with_icon > p {position:relative;}
-.block_simple_nav .block_tree li.item_with_icon > p img {vertical-align:middle;position:absolute;left:0;top:3px}
-.block_simple_nav .block_tree li.item_with_icon.contains_branch > p img {left:0;}
+.block_simple_nav .block_tree li.item_with_icon > p img {vertical-align:middle;position:absolute;left:0;top:3px;}
+.block_simple_nav .block_tree li.item_with_icon.contains_branch > p img {left:0; width: 14px;}
+.block_simple_nav .block_tree li.item_with_icon.contains_branch > p img.navigationitem {top: -1px;}
 .block_simple_nav .block_tree li.item_with_icon.contains_branch .tree_item {padding-left:18px;}
 
 .block_simple_nav .block_tree li.simple_invisible { margin-left: -12px;}

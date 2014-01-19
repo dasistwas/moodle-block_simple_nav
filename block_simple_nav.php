@@ -185,8 +185,8 @@ class block_simple_nav extends block_base {
 
 
 	function get_content() {
-
 		global $CFG, $USER, $DB, $OUTPUT, $PAGE;
+		require_once($CFG->libdir . '/coursecatlib.php');
 		$myopentag = '';
 		$startcategories = array();
 		$categories = array();
@@ -204,10 +204,8 @@ class block_simple_nav extends block_base {
 			print_error('moduledoesnotexist', 'error');
 		}
 
-		//get all the Categories
-		$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
-		
-		
+		// get all the categories and courses from the navigation node
+		$categorytree = coursecat::get(0)->get_children();// get_course_category_tree();
 		
 		// and make an array with all the names
 		foreach ($modules as $module) {
@@ -339,12 +337,12 @@ class block_simple_nav extends block_base {
 		// here we set a value to determine, wether this is the topnode category
 		
 		// Now we run through all the categories
-		foreach ($categories as $category) {
+		foreach ($categorytree as $catid => $category) {
 			
 			
 			// we just want to show the category if it is selected in the admin-section
 			
-			$check_startcategory = "startcategory_".$category->id;
+			$check_startcategory = "startcategory_".$catid;
 			if (isset($this->config->$check_startcategory)) {
 					$startcategory_value = $this->config->$check_startcategory;
 			}
@@ -485,6 +483,6 @@ class block_simple_nav extends block_base {
 
 		return $this->content;
 	}
-
+	function has_config() {return true;}
 
 }
