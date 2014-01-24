@@ -42,6 +42,8 @@ class block_simple_nav extends block_base {
 	protected $contentgenerated = false;
 	/** @var bool|null */
 	protected $docked = null;
+	/** @var array */
+	protected $categories = array();
 
 	function init() {
 		global $CFG;
@@ -122,6 +124,23 @@ class block_simple_nav extends block_base {
 		$item = array('myclass'=>$myclass, 'myid'=>$myid, 'myname'=>$myname, 'mydepth'=>$mydepth, 'mytype'=>$mytype, 'mypath'=>$mypath, 'myicon'=>$myicon, 'myvisibility'=>$myvisibility);
 
 		return $item;
+	}
+	
+	/**
+	 * create $this->categories array with all cats in an array from given parent category id
+	 * 
+	 * @param integer $parentcategoryid
+	 */
+	public function simple_nav_get_categories($parentcategoryid){
+		$childcategories = coursecat::get($parentcategoryid)->get_children();
+		if(!empty($childcategories)){
+			foreach ($childcategories as $catid => $childcategory){
+				$this->categories[$catid] = $childcategory;
+				if($childcategory->get_children_count() > 0){
+					self::simple_nav_get_categories($catid);
+				}
+			}
+		}
 	}
 
 
@@ -205,7 +224,9 @@ class block_simple_nav extends block_base {
 		}
 
 		// get all the categories and courses from the navigation node
-		$categorytree = coursecat::get(0)->get_children();// get_course_category_tree();
+		// save them in $this->categories
+		$this->simple_nav_get_categories(0); //coursecat::get(0)->get_children();// get_course_category_tree();
+		//$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
 		
 		// and make an array with all the names
 		foreach ($modules as $module) {
@@ -337,7 +358,7 @@ class block_simple_nav extends block_base {
 		// here we set a value to determine, wether this is the topnode category
 		
 		// Now we run through all the categories
-		foreach ($categorytree as $catid => $category) {
+		foreach ($this->categories as $catid => $category) {
 			
 			
 			// we just want to show the category if it is selected in the admin-section

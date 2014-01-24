@@ -7,16 +7,37 @@
 
  */
 class block_simple_nav_edit_form extends block_edit_form {
- 
+	
+	/** @var array */
+	protected $categories = array();
+	
+	/**
+	 * create $this->categories array with all cats in an array from given parent category id
+	 *
+	 * @param integer $parentcategoryid
+	 */
+	protected function simple_nav_get_categories($parentcategoryid){
+		$childcategories = coursecat::get($parentcategoryid)->get_children();
+		if(!empty($childcategories)){
+			foreach ($childcategories as $catid => $childcategory){
+				$this->categories[$catid] = $childcategory;
+				if($childcategory->get_children_count() > 0){
+					self::simple_nav_get_categories($catid);
+				}
+			}
+		}
+	}
+    
     protected function specific_definition($mform) {
  		global $CFG, $DB;
+ 		require_once($CFG->libdir . '/coursecatlib.php');
  		$module_names = array();
  		
  		// get a list of all the categories
  		
  		//get all the Categories
-		$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
- 		
+		// get_course_category_tree();
+		$this->simple_nav_get_categories(0);
         // Section header title according to language file.
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
         // A sample string variable with a default value.
@@ -51,7 +72,7 @@ class block_simple_nav_edit_form extends block_edit_form {
  		$mform->setDefault('config_startcategory_home', 1);
         $mform->setType('config_startcategory_home', PARAM_MULTILANG);
         $mform->disabledIf('config_startcategory_home', "home", $condition = 'checked');
- 		foreach ($categories as $category) {
+ 		foreach ($this->categories as $category) {
  			// change the value here if you want to control more of the subcategories etc. After changing the value, you have to check if everything is displayed as you want. It might be necessary to reinstall the whole block (especially when you decrease the value)
  			if ($category->depth<=6) {
  				// if you enter a value for str_repeat (like "--" i.e., the categories and subcategories will be easier to distinguish
@@ -79,7 +100,7 @@ class block_simple_nav_edit_form extends block_edit_form {
                 
         $this->add_checkbox_controller('group1');
         foreach ($module_names as $module_name) {
-        	$mform->addElement('advcheckbox','config_show_mods_'.$module_name.'', get_string('sn_show_mods', 'block_simple_nav').''.get_string('pluginname',$module_name), null,array('group' => 'group1'));
+        	$mform->addElement('advcheckbox','config_show_mods_'.$module_name.'', get_string('pluginname',$module_name), null,array('group' => 'group1'));
         	
         	// Label and url are not real modules, so we don't want to show them by default.
         	if ($module_name == "label" || $module_name == "url") {
@@ -97,7 +118,7 @@ class block_simple_nav_edit_form extends block_edit_form {
         $this->add_checkbox_controller('group2');
         foreach ($module_names as $module_name) {
 
-        	$mform->addElement('advcheckbox','config_show_mods_frontpage_'.$module_name.'', get_string('sn_show_mods', 'block_simple_nav').''.get_string('pluginname',$module_name), null,array('group' => 'group2'));
+        	$mform->addElement('advcheckbox','config_show_mods_frontpage_'.$module_name.'', get_string('pluginname',$module_name), null,array('group' => 'group2'));
 			
 			// Label and url are not real modules, so we don't want to show them by default.
 			if ($module_name == "label" || $module_name == "url") {
