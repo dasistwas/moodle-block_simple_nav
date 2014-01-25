@@ -8,7 +8,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version = 20140119056;
+$plugin->version = 2014012600;
 $plugin->requires =  2013051400;
 $plugin->cron = 0;
 $plugin->component = 'block_simple_nav';
