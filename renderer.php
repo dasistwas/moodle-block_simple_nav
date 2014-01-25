@@ -100,7 +100,7 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 		
 		// is it a category
 		if ($mytype == 'category') {
-			$myurl =$CFG->wwwroot.'/course/category.php?id='.$myid;
+			$myurl =$CFG->wwwroot.'/course/index.php?categoryid='.$myid;
 			//$myname = "";
 			$myclass_ul_open = '';
 			$myclass_li = 'type_category depth_'.$mydepth.''.$mycollapsed.' contains_branch'.$mystartclass;

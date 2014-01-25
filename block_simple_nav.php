@@ -99,8 +99,8 @@ class block_simple_nav extends block_base {
 
 	function get_required_javascript() {
 		global $CFG;
+		parent::get_required_javascript();
 		user_preference_allow_ajax_update('docked_block_instance_'.$this->instance->id, PARAM_INT);
-		$this->page->requires->js_module('core_dock');
 		$limit = 20;
 		if (!empty($CFG->navcourselimit)) {
 			$limit = $CFG->navcourselimit;
