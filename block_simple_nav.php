@@ -475,7 +475,7 @@ class block_simple_nav extends block_base {
 				//this is necessary to be able to get the module name, we hereby fetch the module object
 				$module_object = get_coursemodule_from_id($module->modname, $module->id);
 
-				if (!$module_object->visible) {
+				if (!$module->visible) {
 					continue;
 				}
 				foreach ($module_frontpage_items as $module_item) {
