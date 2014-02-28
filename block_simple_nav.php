@@ -145,17 +145,12 @@ class block_simple_nav extends block_base {
 
 
 	/**
-
 	 * Looks at the navigation items and checks if
-
 	 * the actual item is active
-
 	 *
-
-	 * @return  returns string (class) active_tree_node if acitv otherwise null
-
+	 * @return  returns string (class) active_tree_node if active otherwise null
 	 */
-	function simple_nav_get_class_if_active ($myid, $mytype) {
+	protected function simple_nav_get_class_if_active ($myid, $mytype) {
 		global $CFG, $PAGE;
 		$myclass = null;
 
@@ -203,12 +198,9 @@ class block_simple_nav extends block_base {
 	}
 
 
-	function get_content() {
+	public function get_content() {
 		global $CFG, $USER, $DB, $OUTPUT, $PAGE;
 		require_once($CFG->libdir . '/coursecatlib.php');
-		$myopentag = '';
-		$startcategories = array();
-		$categories = array();
 
 		if($this->content !== NULL) {
 			return $this->content;
@@ -219,15 +211,17 @@ class block_simple_nav extends block_base {
 		$module_names = array();
 			
 		// getting a list of all the modules names is inactive, as it leads to some problems with non standard modules. We do this manually beneath
-		if (!$modules = $DB->get_records('modules', array(), 'name ASC')) {
+		if (!$modules = $DB->get_records('modules', array(), 'name ASC','id, name')) {
 			print_error('moduledoesnotexist', 'error');
 		}
 
+		
 		// get all the categories and courses from the navigation node
 		// save them in $this->categories
-		$this->simple_nav_get_categories(0); //coursecat::get(0)->get_children();// get_course_category_tree();
-		//$categories = get_categories($parent = 'none', $sort = 'sortorder ASC', $shallow = false);
-		
+		if(empty($this->categories)){
+		     $this->simple_nav_get_categories(0); //coursecat::get(0)->get_children();// get_course_category_tree();
+		}
+				
 		// and make an array with all the names
 		foreach ($modules as $module) {
 		
@@ -314,25 +308,14 @@ class block_simple_nav extends block_base {
 
 		}
 		
-
-		$this->content = new stdClass;
-		$this->content->items = array();
-		$this->content->icons = array();
-		$this->content->footer = '';
-		
 		//some variables
-		$content = array();
 		$items = array();
-		$active_module_course = null;
 		$is_active = false;
-		$mybranch = array();
 		$icon ='';
 		$topnodelevel = 0;
-		
-		
-		
+
 		//get all the Courses
-		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.*');
+		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.visible');
 		//$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.modinfo, c.visible');
 
 		//get the Home-Node
@@ -429,7 +412,7 @@ class block_simple_nav extends block_base {
 
 					//Here we check the modules for each course
 					//$modules = get_course_mods($course->id);
-					$modules = get_fast_modinfo($course)->get_cms();
+					$modules = get_fast_modinfo($course->id)->get_cms();
 					
 					if ($modules && !$show_modules) {
 						continue;
@@ -440,48 +423,37 @@ class block_simple_nav extends block_base {
 					foreach ($modules as $module) {						
 
 						//this is necessary to be able to get the module name, we hereby fetch the module object
-						$module_object = get_coursemodule_from_id($module->modname, $module->id);
 						// show only modules that are visible to the user
 						if (!$module->uservisible) {
 							continue;
 						}
-
-
+						
 						foreach ($module_items as $module_item) {
-							if ($module_item['name'] == $module_object->modname && $module_item['value']) {
-								$myclass = $this->simple_nav_get_class_if_active($module_object->id, 'module');
-								$items[]=$this->simple_nav_collect_items ($myclass, $module_object->id, $module_object->name, $category->depth+3, 'module', $module_object->course, $module_object->modname, $course->visible);
+							if ($module_item['name'] == $module->modname && $module_item['value']) {
+								$myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
+								$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, $category->depth+3, 'module', $module->course, $module->modname, $course->visible);
 								break;
 							}
 						}
-
 					}
-
-
-
 				}
 			}
 		}
-
-
-
 		// the following lines are to get all the mods which are directly beneath the startpage. This is a special case, so we have to treat it differently.
-		$modules = get_course_mods(1);
+		$modules = get_fast_modinfo(1)->get_cms();
 		if ($modules && $show_modules) {
 			//we run through them and add them to the $items
 
 			foreach ($modules as $module) {
-
 				//this is necessary to be able to get the module name, we hereby fetch the module object
-				$module_object = get_coursemodule_from_id($module->modname, $module->id);
 
 				if (!$module->visible) {
 					continue;
 				}
 				foreach ($module_frontpage_items as $module_item) {
-					if ($module_item['name'] == $module_object->modname && $module_item['value']) {
-						$myclass = $this->simple_nav_get_class_if_active($module_object->id, 'module');
-						$items[]=$this->simple_nav_collect_items ($myclass, $module_object->id, $module_object->name, 1, 'module', $module_object->course, $module_object->modname, 1);
+					if ($module_item['name'] == $module->modname && $module_item['value']) {
+						$myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
+						$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, 1, 'module', $module->course, $module->modname, 1);
 						break;
 					}
 				}
