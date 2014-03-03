@@ -34,8 +34,6 @@
 */
 class block_simple_nav extends block_base {
 
-	/** @var int */
-	public static $navcount;
 	/** @var string */
 	public $blockname = null;
 	/** @var bool */
@@ -44,12 +42,22 @@ class block_simple_nav extends block_base {
 	protected $docked = null;
 	/** @var array */
 	protected $categories = array();
-
+	/** @var array */
+	protected $courses = array();
+	
+	public static function sn_courses(){
+	 static $mycourses;
+	 if(empty($mycourses)){
+	  $mycourses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.visible');
+	 }
+	 return $mycourses;
+	}
+	
 	function init() {
 		global $CFG;
 		$this->blockname = get_class($this);
 		$this->title = get_string('pluginname', 'block_simple_nav');
-		
+		$this->courses = $this::sn_courses();
 	}
 
 	/**
@@ -93,7 +101,6 @@ class block_simple_nav extends block_base {
 	}
 
 	function instance_can_be_docked() {
-		
 		return (parent::instance_can_be_docked() && (empty($this->config->enabledock) || $this->config->enabledock=='yes'));
 	}
 
@@ -122,7 +129,6 @@ class block_simple_nav extends block_base {
 
 	function simple_nav_collect_items ($myclass, $myid, $myname, $mydepth, $mytype, $mypath, $myicon, $myvisibility) {
 		$item = array('myclass'=>$myclass, 'myid'=>$myid, 'myname'=>$myname, 'mydepth'=>$mydepth, 'mytype'=>$mytype, 'mypath'=>$mypath, 'myicon'=>$myicon, 'myvisibility'=>$myvisibility);
-
 		return $item;
 	}
 	
@@ -143,7 +149,6 @@ class block_simple_nav extends block_base {
 		}
 	}
 
-
 	/**
 	 * Looks at the navigation items and checks if
 	 * the actual item is active
@@ -151,7 +156,7 @@ class block_simple_nav extends block_base {
 	 * @return  returns string (class) active_tree_node if active otherwise null
 	 */
 	protected function simple_nav_get_class_if_active ($myid, $mytype) {
-		global $CFG, $PAGE;
+		global $PAGE;
 		$myclass = null;
 
 		if ($mytype == null && ($PAGE->pagetype <> 'site-index' && $PAGE->pagetype <>'admin-index')) {
@@ -199,19 +204,16 @@ class block_simple_nav extends block_base {
 
 
 	public function get_content() {
-		global $CFG, $USER, $DB, $OUTPUT, $PAGE;
+		global $CFG, $DB;
 		require_once($CFG->libdir . '/coursecatlib.php');
-
+		$module_frontpage_items = array();
+		$module_items = array();
 		if($this->content !== NULL) {
 			return $this->content;
 		}
-		
-
-		// We fetch a list of all the module names
-		$module_names = array();
 			
 		// getting a list of all the modules names is inactive, as it leads to some problems with non standard modules. We do this manually beneath
-		if (!$modules = $DB->get_records('modules', array(), 'name ASC','id, name')) {
+		if (!$allmodules = $DB->get_records('modules', array(), 'name ASC','name')) {
 			print_error('moduledoesnotexist', 'error');
 		}
 
@@ -223,12 +225,12 @@ class block_simple_nav extends block_base {
 		}
 				
 		// and make an array with all the names
-		foreach ($modules as $module) {
+		foreach ($allmodules as $module) {
 		
 			// we use from hereon "$module['name']. If we automatically fetch the list of modules (see above), this has to be changed to §module->name
 			$show_mods = 'show_mods_'.$module->name;
 			
-			if (! empty($this->config)) {
+			if (!empty($this->config)) {
 				// we check here if there is a valid property available in the config-file for a specific module
 				if (isset($this->config->$show_mods)) {
 					$mods_value = $this->config->$show_mods;
@@ -244,14 +246,14 @@ class block_simple_nav extends block_base {
 			}
 			else {
 				$mods_value = 1;
-				
 			}
 
-			$module_item = array('name'=>$module->name, 'value'=>$mods_value);
-			$module_items[] = $module_item;
+			if($mods_value == 1){
+			    $module_items[] = $module->name;
+			}
 		}
 
-		foreach ($modules as $module) {
+		foreach ($allmodules as $module) {
 			$show_mods_frontpage = 'show_mods_frontpage_'.$module->name;
 			
 			if (! empty($this->config)) {
@@ -261,9 +263,7 @@ class block_simple_nav extends block_base {
 				}
 				// if this is not the case, we just turn it off
 				else {
-					//print_object($module);
 					$mods_value_frontapge = 0;
-					// echo "Please click on safe in the config section of this block, there is a module for which there is no config property defined";
 				}
 			}
 			elseif ($module->name == "label" || $module->name == "url") {
@@ -273,10 +273,10 @@ class block_simple_nav extends block_base {
 				$mods_value_frontpage = 1;
 			}
 
-			$module_frontpage_item = array('name'=>$module->name, 'value'=>$mods_value_frontpage);
-			$module_frontpage_items[] = $module_frontpage_item;
+			if($mods_value_frontpage == 1){
+			    $module_frontpage_items[] = $module->name;
+			}
 		}
-
 
 
 		// Get all the variables from the edit_form.php
@@ -298,14 +298,12 @@ class block_simple_nav extends block_base {
 		}
 		else {
 			$show_modules = 1;
-
 		}
 		if (! empty($this->config) && isset($this->config->show_toplevelnode)) {
 			$show_toplevelnode = $this->config->show_toplevelnode;
 		}
 		else {
 			$show_toplevelnode = 1;
-
 		}
 		
 		//some variables
@@ -313,10 +311,6 @@ class block_simple_nav extends block_base {
 		$is_active = false;
 		$icon ='';
 		$topnodelevel = 0;
-
-		//get all the Courses
-		$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.visible');
-		//$courses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.modinfo, c.visible');
 
 		//get the Home-Node
 		// first check if the Home Node is activated in the admin section
@@ -337,13 +331,9 @@ class block_simple_nav extends block_base {
 			$myclass = $this->simple_nav_get_class_if_active(null, null);
 			$items[]=$this->simple_nav_collect_items($myclass, null, $sn_home, null, 'nohome', 0, null, null);
 		}
-
-		// here we set a value to determine, wether this is the topnode category
 		
 		// Now we run through all the categories
 		foreach ($this->categories as $catid => $category) {
-			
-			
 			// we just want to show the category if it is selected in the admin-section
 			
 			$check_startcategory = "startcategory_".$catid;
@@ -353,15 +343,11 @@ class block_simple_nav extends block_base {
 			// We look if there is no config object at all. If there is a config object, we put the value on 0
 			elseif(!empty($this->config)) {
 				$startcategory_value = 0;
-				
 			}
 			// if there is no config object at all, we just show everything.
 			else {
 				$startcategory_value = 1;
 			}
-			
-			//)
-			//
 			
 			if ($startcategory_value >= 1) {
 			
@@ -389,26 +375,22 @@ class block_simple_nav extends block_base {
 				$is_active = true;
 			}
 			
-			
-			foreach ($courses as $course) {
+			foreach ($this->courses as $course) {
 
 				if ($category->id == $course->category && $show_courses ) {
 
 					$myclass = $this->simple_nav_get_class_if_active($course->id, 'course');
 					$items[]=$this->simple_nav_collect_items ($myclass, $course->id, $course->shortname, $category->depth+2, 'course', $category->id, $icon, $course->visible);
 
-
 					//don't show any modules if there is no access to the course
 					if (!can_access_course($course)) {
 						continue;
 					}
 
-
 					// this is to count back from the item to the whole active branch
 					if ($myclass) {
 						$is_active = true;
 					}
-
 
 					//Here we check the modules for each course
 					//$modules = get_course_mods($course->id);
@@ -418,23 +400,16 @@ class block_simple_nav extends block_base {
 						continue;
 					}
 
-
 					//we run through them and add them to the $items
 					foreach ($modules as $module) {						
 
-						//this is necessary to be able to get the module name, we hereby fetch the module object
 						// show only modules that are visible to the user
-						if (!$module->uservisible) {
+						if (!$module->uservisible && !in_array($module->name, $module_items)) {
 							continue;
 						}
-						
-						foreach ($module_items as $module_item) {
-							if ($module_item['name'] == $module->modname && $module_item['value']) {
-								$myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
-								$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, $category->depth+3, 'module', $module->course, $module->modname, $course->visible);
-								break;
-							}
-						}
+							$myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
+							$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, $category->depth+3, 'module', $module->course, $module->modname, $course->visible);
+							break;
 					}
 				}
 			}
@@ -445,31 +420,19 @@ class block_simple_nav extends block_base {
 			//we run through them and add them to the $items
 
 			foreach ($modules as $module) {
-				//this is necessary to be able to get the module name, we hereby fetch the module object
 
-				if (!$module->visible) {
+				if (!$module->visible && !in_array($module->name, $module_frontpage_items)) {
 					continue;
 				}
-				foreach ($module_frontpage_items as $module_item) {
-					if ($module_item['name'] == $module->modname && $module_item['value']) {
-						$myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
-						$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, 1, 'module', $module->course, $module->modname, 1);
-						break;
-					}
-				}
+				    $myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
+					$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, 1, 'module', $module->course, $module->modname, 1);
+					break;
 			}
 		}
 
-
-		$this->page->navigation->initialise();
-		$navigation = clone($this->page->navigation);
-
 		$renderer = $this->page->get_renderer('block_simple_nav');
-
 		$this->content         =  new stdClass;
 		$this->content->text   = $renderer->simple_nav_tree($items);
-			
-
 
 		// Set content generated to true so that we know it has been done
 		$this->contentgenerated = true;

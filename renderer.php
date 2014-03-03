@@ -1,10 +1,7 @@
 <?php
 /**
-
  * Used to render the navigation items in the simple_nav block
-
  *
-
  */
 class block_simple_nav_renderer extends plugin_renderer_base {
 

@@ -465,7 +465,7 @@ BRANCH.prototype = {
         branch.addChild({
             name : M.str.moodle.viewallcourses,
             title : M.str.moodle.viewallcourses,
-            link : M.cfg.wwwroot+'/course/category.php?id='+branch.get('key'),
+            link : M.cfg.wwwroot+'/course/index.php?categoryid='+branch.get('key'),
             haschildren : false,
             icon : {'pix':"i/navigationitem",'component':'moodle'}
         });
