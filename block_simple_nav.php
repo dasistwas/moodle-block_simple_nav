@@ -16,14 +16,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *
- * @since 2.0
- * @package blocks
- * @copyright 2012 Georg Maißer und David Bogner http://www.edulabs.org
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-/**
  * The simple navigation tree block class
  *
  * Used to produce a simple navigation block
@@ -45,7 +37,7 @@ class block_simple_nav extends block_base {
 	/** @var array */
 	protected $courses = array();
 	
-	public static function sn_courses(){
+	public static function simple_nav_get_courses(){
 	 static $mycourses;
 	 if(empty($mycourses)){
 	  $mycourses = get_courses($categoryid = 'all', $sort = 'c.sortorder ASC', $fields = 'c.id, c.category, c.shortname, c.visible');
@@ -57,7 +49,7 @@ class block_simple_nav extends block_base {
 		global $CFG;
 		$this->blockname = get_class($this);
 		$this->title = get_string('pluginname', 'block_simple_nav');
-		$this->courses = $this::sn_courses();
+		$this->courses = self::simple_nav_get_courses();
 	}
 
 	/**
@@ -391,44 +383,42 @@ class block_simple_nav extends block_base {
 					if ($myclass) {
 						$is_active = true;
 					}
-
+                    if(!$show_modules){
+                        continue;
+                    }
 					//Here we check the modules for each course
-					//$modules = get_course_mods($course->id);
 					$modules = get_fast_modinfo($course->id)->get_cms();
 					
-					if ($modules && !$show_modules) {
+					if (empty($modules)) {
 						continue;
 					}
 
 					//we run through them and add them to the $items
 					foreach ($modules as $module) {						
-
 						// show only modules that are visible to the user
-						if (!$module->uservisible && !in_array($module->name, $module_items)) {
+						if (!$module->uservisible || !in_array($module->modname, $module_items)) {
 							continue;
 						}
 							$myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
 							$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, $category->depth+3, 'module', $module->course, $module->modname, $course->visible);
-							break;
 					}
 				}
 			}
+			// the following lines are to get all the mods which are directly beneath the startpage. This is a special case, so we have to treat it differently.
+			$modules = get_fast_modinfo(1)->get_cms();
+			if ($modules && $show_modules) {
+			 //we run through them and add them to the $items
+			
+			 foreach ($modules as $module) {
+			  if (!$module->uservisible || !in_array($module->modname, $module_frontpage_items)) {
+			   continue;
+			  }
+			  $myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
+			  $items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, 1, 'module', $module->course, $module->modname, 1);
+			 }
+			}	
 		}
-		// the following lines are to get all the mods which are directly beneath the startpage. This is a special case, so we have to treat it differently.
-		$modules = get_fast_modinfo(1)->get_cms();
-		if ($modules && $show_modules) {
-			//we run through them and add them to the $items
 
-			foreach ($modules as $module) {
-
-				if (!$module->visible && !in_array($module->name, $module_frontpage_items)) {
-					continue;
-				}
-				    $myclass = $this->simple_nav_get_class_if_active($module->id, 'module');
-					$items[]=$this->simple_nav_collect_items ($myclass, $module->id, $module->name, 1, 'module', $module->course, $module->modname, 1);
-					break;
-			}
-		}
 
 		$renderer = $this->page->get_renderer('block_simple_nav');
 		$this->content         =  new stdClass;
