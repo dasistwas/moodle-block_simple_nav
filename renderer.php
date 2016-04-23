@@ -173,11 +173,11 @@ class block_simple_nav_renderer extends plugin_renderer_base {
 			// fork for Angela Kohl
 			$displayoption = get_config('block_simple_nav', 'displayoptions');
 			if($displayoption === '1'){
-				$icon = '<img alt="'.$myicon.'" class="smallicon navicon" title="'.$myicon.'" src="'.$baseurl.'/theme/image.php?theme=standard&amp;image=icon&amp;rev=295&amp;component='.$myicon.'">';
+				$icon = '<img alt="'.$myicon.'" class="smallicon navicon" src="'.$baseurl.'/theme/image.php?theme=standard&amp;image=icon&amp;rev=295&amp;component='.$myicon.'">';
 			} else if ($displayoption === '2'){
-				$icon = '<img alt="'.$myicon.'" class="smallicon navicon" title="'.$myicon.'" src="'.$baseurl.'/theme/image.php?theme='.$CFG->theme.'&amp;image=t/collapsed&amp;rev=295&amp;component=core">';
+				$icon = '<img alt="'.$myicon.'" class="smallicon navicon" src="'.$baseurl.'/theme/image.php?theme='.$CFG->theme.'&amp;image=t/collapsed&amp;rev=295&amp;component=core">';
 			} else {
-				$icon = '<img alt="'.$myicon.'" class="smallicon navicon navigationitem" title="'.$myicon.'" src="'.$baseurl.'/theme/image.php?theme='.$CFG->theme.'&amp;image=i/navigationitem&amp;rev=295&amp;component=core">';
+				$icon = '<img alt="'.$myicon.'" class="smallicon navicon navigationitem" src="'.$baseurl.'/theme/image.php?theme='.$CFG->theme.'&amp;image=i/navigationitem&amp;rev=295&amp;component=core">';
 			}
 			
 		}
