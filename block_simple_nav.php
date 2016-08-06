@@ -136,25 +136,12 @@ class block_simple_nav extends block_base {
      * @see block_base::get_required_javascript()
      */
     function get_required_javascript() {
-        global $CFG;
         parent::get_required_javascript();
-        user_preference_allow_ajax_update('docked_block_instance_' . $this->instance->id, PARAM_INT);
-        $limit = 20;
-        if (!empty($CFG->navcourselimit)) {
-            $limit = $CFG->navcourselimit;
-        }
-        $expansionlimit = 0;
-        if (!empty($this->config->expansionlimit)) {
-            $expansionlimit = $this->config->expansionlimit;
-        }
-        $arguments = array('id' => $this->instance->id, 'instance' => $this->instance->id, 
-            'candock' => $this->instance_can_be_docked(), 'courselimit' => $limit, 
-            'expansionlimit' => $expansionlimit
+        $arguments = array(
+            'instanceid' => $this->instance->id
         );
         $this->page->requires->string_for_js('viewallcourses', 'moodle');
-        $this->page->requires->yui_module(array('core_dock', 'moodle-block_navigation-navigation'
-        ), 'M.block_navigation.init_add_tree', array($arguments
-        ));
+        $this->page->requires->js_call_amd('block_simple_nav/navblock', 'init', $arguments);
     }
 
     /**
@@ -488,5 +475,14 @@ class block_simple_nav extends block_base {
 
     function has_config() {
         return true;
+    }
+    
+    /**
+     * Returns the role that best describes the simple_nav block... 'navigation'
+     *
+     * @return string 'navigation'
+     */
+    public function get_aria_role() {
+        return 'navigation';
     }
 }

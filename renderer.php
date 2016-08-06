@@ -14,6 +14,8 @@ class block_simple_nav_renderer extends plugin_renderer_base {
         $node = $doc->createElement('ul');
         $mainnode = $doc->appendChild($node);
         $mainnode->setAttribute('class', 'block_tree list');
+        $mainnode->setAttribute('role', 'tree');
+        $mainnode->setAttribute('data-ajax-loader', 'block_simple_nav/nav_loader');
         $coursenode = null;
         
         for ($i = 0; $i < count($items); $i++) {
@@ -68,6 +70,9 @@ class block_simple_nav_renderer extends plugin_renderer_base {
         $itemicon = $item['myicon'];
         $itemname = $item['myname'];
         $itemid = $item['myid'];
+        $isexpandable = (empty($expansionlimit) || ($item->type > navigation_node::TYPE_ACTIVITY || $item->type < $expansionlimit) || ($item->contains_active_node() && $item->children->count() > 0));
+        //$isbranch = $isexpandable && ($item->children->count() > 0 || ($item->has_children() && (isloggedin() || $item->type <= navigation_node::TYPE_CATEGORY)));
+        
         
         
         if (!empty($this->config->space)) {
@@ -84,9 +89,13 @@ class block_simple_nav_renderer extends plugin_renderer_base {
         $mycollapsed = '';
         // myclass only has a value when it's active
         if (!$itemclass) {
-            $mycollapsed = ' collapsed';
+            $ecpanded = ' collapsed';
+            $expanded = 'false';
+            
         } else {
             $mycollapsed = '';
+            $expanded = 'true';
+            
         }
         
         // sometimes, we don't show categories by simple setting their name to "". If this is the
@@ -175,6 +184,7 @@ class block_simple_nav_renderer extends plugin_renderer_base {
         $p = $doc->createElement('p');
         $p = $li->appendChild($p);
         $p->setAttribute('class', $itemclass_p);
+        $p->setAttribute('aria-expanded', $expanded);
         $text = $doc->createTextNode($itemname);
         $a = $doc->createElement('a');
         $a->appendChild($text);
