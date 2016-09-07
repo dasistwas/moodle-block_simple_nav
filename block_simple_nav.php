@@ -289,7 +289,8 @@ class block_simple_nav extends block_base {
         
         foreach ($allmodules as $module) {
             $show_mods_frontpage = 'show_mods_frontpage_' . $module->name;
-            
+            $mods_value_frontpage = null;
+
             if (!empty($this->config)) {
                 // we check here if there is a valid property available in the config-file for a
                 // specific module
