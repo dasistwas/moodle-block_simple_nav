@@ -1,5 +1,18 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Used to define settings of the block simple_nav
@@ -30,16 +43,16 @@ class block_simple_nav_edit_form extends block_edit_form {
 
     /**
      * (non-PHPdoc)
-     * 
+     *
      * @see block_edit_form::specific_definition()
      */
     protected function specific_definition($mform) {
         global $CFG, $DB;
         require_once ($CFG->libdir . '/coursecatlib.php');
         $module_names = array();
-        
+
         // get a list of all the categories
-        
+
         // get all the Categories
         // get_course_category_tree();
         $this->simple_nav_get_categories(0);
@@ -49,39 +62,39 @@ class block_simple_nav_edit_form extends block_edit_form {
         $mform->addElement('text', 'config_sn_home', get_string('sn_home', 'block_simple_nav'));
         $mform->setDefault('config_sn_home', '');
         $mform->setType('config_sn_home', PARAM_MULTILANG);
-        
-        $mform->addElement('text', 'config_sn_blocktitle', 
+
+        $mform->addElement('text', 'config_sn_blocktitle',
                 get_string('sn_blocktitle', 'block_simple_nav'));
         $mform->setDefault('config_sn_blocktitle', '');
         $mform->setType('config_sn_blocktitle', PARAM_MULTILANG);
-        
-        $mform->addElement('advcheckbox', 'config_show_courses', 
+
+        $mform->addElement('advcheckbox', 'config_show_courses',
                 get_string('sn_show_courses', 'block_simple_nav'), null, array('group' => 2
                 ));
         $mform->setDefault('config_show_courses', 1);
         $mform->setType('config_show_courses', PARAM_MULTILANG);
-        
-        $mform->addElement('advcheckbox', 'config_show_modules', 
+
+        $mform->addElement('advcheckbox', 'config_show_modules',
                 get_string('sn_show_modules', 'block_simple_nav'), null, array('group' => 2
                 ));
         $mform->setDefault('config_show_modules', 1);
         $mform->setType('config_show_modules', PARAM_MULTILANG);
-        
+
         // show link toplevelnode
-        $mform->addElement('advcheckbox', 'config_show_toplevelnode', 
+        $mform->addElement('advcheckbox', 'config_show_toplevelnode',
                 get_string('sn_show_toplevelnode', 'block_simple_nav'), null, array('group' => 2
                 ));
         $mform->setDefault('config_show_toplevelnode', 1);
         $mform->setType('config_show_toplevelnode', PARAM_MULTILANG);
-        
+
         // we want to be able to select the categories we want to include here
-        
-        $mform->addElement('html', 
+
+        $mform->addElement('html',
                 '<div style="font-weight: bold;">' .
                          get_string('sn_startcategory', 'block_simple_nav') . '</div>');
-        
+
         // first we manually enter the home node
-        $mform->addElement('advcheckbox', 'config_startcategory_home', "home", null, 
+        $mform->addElement('advcheckbox', 'config_startcategory_home', "home", null,
                 array('group' => 'group3'
                 ));
         $mform->setDefault('config_startcategory_home', 1);
@@ -95,61 +108,61 @@ class block_simple_nav_edit_form extends block_edit_form {
             if ($category->depth <= 6) {
                 // if you enter a value for str_repeat (like "--" i.e., the categories and
                 // subcategories will be easier to distinguish
-                $mform->addElement('advcheckbox', 'config_startcategory_' . $category->id . '', 
-                        str_repeat("*", $category->depth) . $category->name . '', null, 
+                $mform->addElement('advcheckbox', 'config_startcategory_' . $category->id . '',
+                        str_repeat("*", $category->depth) . $category->name . '', null,
                         array('group' => 'group3'
                         ));
                 $mform->setDefault('config_startcategory_' . $category->id . '', 0);
                 $mform->setType('config_startcategory_' . $category->id . '', PARAM_MULTILANG);
                 // $mform->setValue($category->depth);
-                $mform->disabledIf('config_startcategory_' . $category->id . '', $category->name, 
+                $mform->disabledIf('config_startcategory_' . $category->id . '', $category->name,
                         $condition = 'notchecked');
             }
         }
-        
+
         // In this section we let the user chose which modules should be displayed
-        $mform->addElement('html', 
+        $mform->addElement('html',
                 '<div style="font-weight: bold;">' .
                          get_string('sn_modules_in_courses', 'block_simple_nav') . '</div>');
-        
+
         // get a list of all the modules names to print the necessary checkboxes
         if (!$modules = $DB->get_records('modules', array(), 'name ASC')) {
             print_error('moduledoesnotexist', 'error');
         }
-        
+
         foreach ($modules as $module) {
             $module_names[] = $module->name;
         }
-        
+
         $this->add_checkbox_controller('group1');
         foreach ($module_names as $module_name) {
-            $mform->addElement('advcheckbox', 'config_show_mods_' . $module_name . '', 
+            $mform->addElement('advcheckbox', 'config_show_mods_' . $module_name . '',
                     get_string('pluginname', $module_name), null, array('group' => 'group1'
                     ));
-            
+
             // Label and url are not real modules, so we don't want to show them by default.
             if ($module_name == "label" || $module_name == "url") {
                 $mform->setDefault('config_show_mods_' . $module_name . '', 0);
             } else {
                 $mform->setDefault('config_show_mods_' . $module_name . '', 1);
             }
-            
+
             $mform->setType('config_show_mods_' . $module_name . '', PARAM_MULTILANG);
-            $mform->disabledIf('config_show_mods_' . $module_name . '', 'config_show_modules', 
+            $mform->disabledIf('config_show_mods_' . $module_name . '', 'config_show_modules',
                     $condition = 'notchecked');
         }
-        
+
         $mform->addElement('html', '<div>');
-        $mform->addElement('html', 
+        $mform->addElement('html',
                 '<div style="font-weight: bold;">' .
                          get_string('sn_modules_on_frontpage', 'block_simple_nav') . '</div>');
         $this->add_checkbox_controller('group2');
         foreach ($module_names as $module_name) {
-            
-            $mform->addElement('advcheckbox', 'config_show_mods_frontpage_' . $module_name . '', 
+
+            $mform->addElement('advcheckbox', 'config_show_mods_frontpage_' . $module_name . '',
                     get_string('pluginname', $module_name), null, array('group' => 'group2'
                     ));
-            
+
             // Label and url are not real modules, so we don't want to show them by default.
             if ($module_name == "label" || $module_name == "url") {
                 $mform->setDefault('config_show_mods_frontpage_' . $module_name . '', 0);
@@ -157,11 +170,11 @@ class block_simple_nav_edit_form extends block_edit_form {
                 $mform->setDefault('config_show_mods_frontpage_' . $module_name . '', 1);
             }
             $mform->setType('config_show_mods_frontpage_' . $module_name . '', PARAM_MULTILANG);
-            
-            $mform->disabledIf('config_show_mods_frontpage_' . $module_name . '', 
+
+            $mform->disabledIf('config_show_mods_frontpage_' . $module_name . '',
                     'config_show_modules', $condition = 'notchecked');
         }
-        
+
         $mform->addElement('html', '</div>');
     }
 }

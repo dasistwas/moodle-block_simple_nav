@@ -13,7 +13,7 @@
 .block_simple_nav .block_tree li ul {padding-left:12px;margin:0;}
 .block_simple_nav .block_tree .tree_item {padding-left: 18px;margin:3px 0px;text-align:left;}
 
-.block_simple_nav .block_tree .tree_item.branch {background-image: url([[pix:t/expanded]]);background-position: 0 10%;background-repeat: no-repeat;}
+.block_simple_nav .block_tree .tree_item.branch,.block_simple_nav .block_tree .tree_item.branch.hasicon[aria-expanded="true"] {background-image: url([[pix:t/expanded]]);background-position: 0 10%;background-repeat: no-repeat;}
 .block_simple_nav .block_tree .tree_item.branch.navigation_node {background-image:none;padding-left:0;}
 .block_simple_nav .block_tree .type_activity > .tree_item.branch {background-image:none;position:relative;}
 .block_simple_nav .block_tree .type_activity > .tree_item.branch img {position:absolute;left:0;}
@@ -24,9 +24,11 @@
 .dock .block_simple_nav .tree_item {white-space: nowrap;}
 
 .jsenabled .block_simple_nav .block_tree .tree_item.branch {cursor:pointer;}
-.jsenabled .block_simple_nav .block_tree .tree_item.emptybranch {background-image: url([[pix:t/collapsed_empty]]);background-position: 0% 5%;background-repeat: no-repeat;}
+.jsenabled .block_simple_nav .block_tree .tree_item.emptybranch,.block_simple_nav .block_tree .tree_item.branch.hasicon[aria-expanded="false"] {background-image: url([[pix:t/collapsed_empty]]);background-position: 0% 5%;background-repeat: no-repeat;}
 .jsenabled .block_simple_nav .block_tree .collapsed ul {display: none;}
-.jsenabled .block_simple_nav .block_tree .collapsed .tree_item.branch {background-image: url([[pix:t/collapsed]]);}
+.block_simple_nav .block_tree ul[aria-hidden="true"]{display:none;}
+.block_simple_nav .block_tree ul[aria-hidden="false"]{display:block;}
+.jsenabled .block_simple_nav .block_tree .tree_item.branch.hasicon[aria-expanded="false"] {background-image: url([[pix:t/collapsed]]);}
 .jsenabled .block_simple_nav .block_tree .tree_item.branch.loadingbranch {background-image:url([[pix:i/loading_small]]);}
 
 /** JavaScript state rules **/

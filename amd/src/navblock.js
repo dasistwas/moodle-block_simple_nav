@@ -23,8 +23,8 @@
  */
 define(['jquery', 'core/tree'], function($, Tree) {
     return {
-        init: function(instanceid) {
-            var navTree = new Tree(".block_simple_nav .block_tree");
+        init: $(".block_simple_nav .block_tree").each(function(instanceid) {            
+            var navTree = new Tree(this);
             navTree.finishExpandingGroup = function(item) {
                 Tree.prototype.finishExpandingGroup.call(this, item);
                 Y.use('moodle-core-event', function() {
@@ -33,6 +33,7 @@ define(['jquery', 'core/tree'], function($, Tree) {
                     });
                 });
             };
+          
             navTree.collapseGroup = function(item) {
                 Tree.prototype.collapseGroup.call(this, item);
                 Y.use('moodle-core-event', function() {
@@ -41,6 +42,6 @@ define(['jquery', 'core/tree'], function($, Tree) {
                     });
                 });
             };
-        }
+        })
     };
 });
