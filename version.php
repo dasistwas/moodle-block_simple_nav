@@ -23,7 +23,7 @@
  */
 
 $plugin->version = 2018062800;
-$plugin->requires =  2016052300;
+$plugin->requires =  2018051700;
 $plugin->cron = 0;
 $plugin->component = 'block_simple_nav';
 $plugin->maturity = MATURITY_STABLE;
